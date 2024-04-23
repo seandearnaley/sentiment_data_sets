@@ -1,0 +1,71 @@
+You will be provided with a financial news article enclosed within the following XML tags:
+
+<article>{$ARTICLE}</article>
+
+Your task is to carefully read the article and analyze the sentiment it expresses towards the potential future stock value of the company mentioned.
+
+First, write out your reasoning and analysis of the article's sentiment inside the "reasoning" property. Explain the key points in the article that influence your assessment of the sentiment and how they would likely impact the stock price.
+
+Then, output a numeric score between -1.0 and 1.0 representing the sentiment, where -1.0 is the most negative, 0 is neutral, and 1.0 is the most positive. Put this score inside the "sentiment" property.
+
+Provide a sentiment value as a function of how positive or negative the sentiment is. If no conclusion can be drawn, provide a sentiment value of 0.0.
+
+Additionally, provide a confidence score between 0.0 and 1.0 in the "confidence" property, representing how confident you are in the sentiment analysis. A higher score indicates greater confidence.
+
+
+Make no alterations to the schema. This is important for our company.
+
+Examples:
+
+1. <article>NVDA shares rise 5% on earnings beat.</article>
+   Output:
+   ```json
+   {
+     "reasoning": "The news article reports a positive earnings beat, which is likely to increase investor confidence and, consequently, the stock value of NVDA.",
+     "sentiment": 0.75,
+     "confidence": 0.85
+   }
+   ```
+
+2. <article>NVDA shares may be affected by a drop in oil prices. Analysts predict a 5% drop in stock value due to NVDA's exposure to the energy sector.</article>
+   Output:
+   ```json
+   {
+     "reasoning": "The article suggests a potential negative impact on NVDA stock due to falling oil prices, which could lead to decreased investor confidence.",
+     "sentiment": -0.25,
+     "confidence": 0.70
+   }
+   ```
+
+3. <article>Apple's recent launch of its innovative AR glasses has not met expected sales targets.</article>
+   Output:
+   ```json
+   {
+     "reasoning": "Despite the innovative product launch, the failure to meet sales targets could lead to negative market reactions and a potential drop in Apple's stock value.",
+     "sentiment": -0.5,
+     "confidence": 0.80
+   }
+   ```
+
+4. <article>Boeing secures a $5 billion contract for new aircrafts from Emirates, signaling strong future revenues.</article>
+   Output:
+   ```json
+   {
+     "reasoning": "Securing a large contract suggests positive future revenue prospects for Boeing, likely boosting investor sentiment and stock value.",
+     "sentiment": 0.85,
+     "confidence": 0.95
+   }
+   ```
+
+5. Determine the sentiment towards the stock value of Tesla from the following article:
+   <article>Tesla recalls 100,000 vehicles due to safety concerns.</article>
+   Output:
+   ```json
+   {
+     "reasoning": "A significant recall due to safety issues could harm Tesla's brand reputation and negatively impact investor confidence, likely decreasing its stock value.",
+     "sentiment": -0.65,
+     "confidence": 0.90
+   }
+   ```
+
+do you understand the task?
