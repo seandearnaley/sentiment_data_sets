@@ -9,7 +9,9 @@ import litellm
 from dotenv import load_dotenv
 from litellm import Choices, ModelResponse, completion
 from openai import OpenAI
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import ValidationError
+
+from utils.sentiment_response import SentimentResponse
 
 load_dotenv()  # This loads the environment variables from a .env file
 
@@ -18,28 +20,7 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY", "ollama"),  # api_key is required
 )
 
-# from openai.types.chat import ChatCompletionMessageParam
 litellm.drop_params = True
-
-
-class SentimentResponse(BaseModel):
-    reasoning: str = Field(
-        ...,  # This indicates that the 'reasoning' field must be provided
-        description="A brief description explaining the logic used to determine the numeric sentiment value.",
-        min_length=1,
-    )
-    sentiment: float = Field(
-        ...,  # This indicates that the 'sentiment' field must be provided
-        description="A floating-point representation of the sentiment of the news article, rounded to two decimal places. Scale ranges from -1.0 (negative) to 1.0 (positive), where 0.0 represents neutral sentiment.",
-        ge=-1.0,
-        le=1.0,
-    )
-    confidence: float = Field(
-        ...,  # This indicates that the 'confidence' field must be provided
-        description="A floating-point representation of the confidence in the sentiment analysis, ranging from 0.0 (least confident) to 1.0 (most confident), rounded to two decimal places.",
-        ge=0.0,
-        le=1.0,
-    )
 
 
 def read_message_from_file(file_path: str) -> str:
@@ -76,8 +57,6 @@ def make_api_call(
     # Ensure response is an instance of ModelResponse
     if not isinstance(response, ModelResponse):
         raise TypeError("Expected response to be a ModelResponse instance.")
-
-    # Check if response is structured as expected
 
     # Check if response is structured as expected
     if (
@@ -150,9 +129,7 @@ def process_file(file_path, output_file):
                         )
                     )
                     # Validate the JSON response using Pydantic V2 method
-                    sentiment_data = SentimentResponse.model_validate_json(  # noqa
-                        sentiment_json
-                    )
+                    SentimentResponse.model_validate_json(sentiment_json)
                     writer.writerow([article, sentiment_json])
                     break  # Exit the loop if validation is successful
                 except ValidationError as e:
