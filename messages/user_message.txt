@@ -1,8 +1,6 @@
-You will be provided with a financial news article enclosed within the following XML tags:
+You will be provided with a news article.
 
-<article>{$ARTICLE}</article>
-
-Your task is to carefully read the article and analyze the sentiment it expresses towards the potential future stock value of the company mentioned.
+Your task is to carefully read the article and analyze the sentiment it expresses towards the potential future stock value of any company mentioned.
 
 First, write out your reasoning and analysis of the article's sentiment inside the "reasoning" property. Explain the key points in the article that influence your assessment of the sentiment and how they would likely impact the stock price.
 
@@ -17,7 +15,7 @@ Make no alterations to the schema. This is important for our company.
 
 Examples:
 
-1. <article>NVDA shares rise 5% on earnings beat.</article>
+1. Input: NVDA shares rise 5% on earnings beat.
    Output:
    ```json
    {
@@ -27,7 +25,7 @@ Examples:
    }
    ```
 
-2. <article>NVDA shares may be affected by a drop in oil prices. Analysts predict a 5% drop in stock value due to NVDA's exposure to the energy sector.</article>
+2. Input: NVDA shares may be affected by a drop in oil prices. Analysts predict a 5% drop in stock value due to NVDA's exposure to the energy sector.
    Output:
    ```json
    {
@@ -37,7 +35,7 @@ Examples:
    }
    ```
 
-3. <article>Apple's recent launch of its innovative AR glasses has not met expected sales targets.</article>
+3. Input: Apple's recent launch of its innovative AR glasses has not met expected sales targets.
    Output:
    ```json
    {
@@ -47,7 +45,7 @@ Examples:
    }
    ```
 
-4. <article>Boeing secures a $5 billion contract for new aircrafts from Emirates, signaling strong future revenues.</article>
+4. Input: Boeing secures a $5 billion contract for new aircrafts from Emirates, signaling strong future revenues.
    Output:
    ```json
    {
@@ -57,8 +55,7 @@ Examples:
    }
    ```
 
-5. Determine the sentiment towards the stock value of Tesla from the following article:
-   <article>Tesla recalls 100,000 vehicles due to safety concerns.</article>
+5. Input: Tesla recalls 100,000 vehicles due to safety concerns.
    Output:
    ```json
    {

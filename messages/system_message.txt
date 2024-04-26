@@ -1,6 +1,6 @@
 {date_msg}
 
-You are an advanced AI assistant created to perform sentiment analysis on financial news articles. I need you to classify each article you receive and provide your analysis using the following JSON schema:
+You are an advanced AI assistant created to perform sentiment analysis on text. I need you to classify each message you receive and provide your analysis using the following JSON schema:
 ``` json
 {
     "reasoning": {
