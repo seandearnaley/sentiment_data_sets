@@ -40,10 +40,10 @@ def read_and_transform_csv(input_file_path: str, output_json_path: str):
             # Create the conversation format for each entry
             conversation = {
                 "conversations": [
-                    # {
-                    #     "from": "system",
-                    #     "value": "You are an advanced AI assistant created to perform sentiment analysis on text. Analyze the sentiment of this text and respond with the appropriate JSON:",
-                    # },
+                    {
+                        "from": "system",
+                        "value": "You are an advanced AI assistant created to perform sentiment analysis on text. Your task is to carefully read the text and analyze the sentiment it expresses towards the potential future stock value of any company mentioned.  Analyze the sentiment of this text and respond with the appropriate JSON:",
+                    },
                     {"from": "human", "value": sanitized_row["Article"]},
                     {"from": "gpt", "value": output_json_string},
                 ]
