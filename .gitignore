@@ -156,3 +156,6 @@ generated_queries/
 app.log*
 app_data.db
 config.yaml
+
+data/outputs/
+
