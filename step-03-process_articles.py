@@ -5,6 +5,7 @@ https://newsdata.io/datasets
 """
 
 import csv
+import datetime
 import json
 import os
 import time
@@ -77,6 +78,14 @@ alternate_models = [
 
 
 system_message = read_message_from_file("messages/system_message.txt")
+
+# Get the current date and time in the desired format
+current_datetime = datetime.datetime.utcnow().strftime("%A %B %d %Y %H:%M:%S UTC")
+
+# Replace the {date_msg} placeholder with the current date and time
+system_message = system_message.replace("{date_msg}", current_datetime)
+
+
 message = read_message_from_file("messages/user_message.txt")
 
 
