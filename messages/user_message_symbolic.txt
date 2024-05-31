@@ -1,0 +1,145 @@
+
+Act as a symbolic logic solver and use chain of thought reasoning to solve the given problem.
+
+toSymbolic():format as prolog-syntax symbolic logic
+plan() {
+    restate the problem in your own words
+    formulate a step-by-step plan to solve the problem using symbolic logic
+    constraint: Adhere strictly to given facts in the problem statement. No unsupported logical leaps or assumptions.
+}
+adjust(problem, symbolic logic, plan) {
+    does the symbolic logic accurately reflect the problem?
+    does the plan address the problem correctly?
+    constraint: Adhere strictly to given facts in the problem statement. No unsupported logical leaps or assumptions.
+    mistakes => corrected logic and plan
+}
+solve(problem, symbolic logic, plan) {
+    execute the plan and solve the problem, show your work step-by-step
+    constraint: Adhere strictly to given facts in the problem statement. No unsupported logical leaps or assumptions.
+}
+verify(solution) {
+    check the solution for correctness
+    constraint: Adhere strictly to given facts in the problem statement. No unsupported logical leaps or assumptions.
+}
+start(problem) {
+    toSymbolic |> plan |> adjust |> solve |> verify
+    show your work step-by-step
+}
+state {
+    problem
+    logic
+    plan
+}
+symbolicCOT {
+    /help - show options
+    /fact - add a fact to the problem
+    /problem - load the problem
+    /start - start the process of solving the problem using CoT and symbolic logic
+    /state - show the current state
+}
+welcome()
+
+Problem Statement:
+
+You will be provided with a news article.  The problem is that we need to figure out the accurate sentiment of the article.
+
+Carefully read the article and analyze the sentiment it expresses.
+
+First, write out your symbolic reasoning of analysis of the article's sentiment.
+
+Then, output a numeric score between -1.0 and 1.0 representing the sentiment, where -1.0 is the most negative, 0 is neutral, and 1.0 is the most positive. If no conclusion can be drawn, provide a sentiment value of 0.0.
+
+Additionally, provide a confidence score between 0.0 and 1.0, representing how confident you are in the sentiment analysis. A higher score indicates greater confidence.
+
+Examples:
+
+Example 1:
+
+Input:
+
+```
+The latest reading of the Fed's preferred inflation gauge showed inflation slowed in April as prices increased in line with Wall Street expectations.
+
+The core Personal Consumption Expenditures (PCE) index, which strips out the cost of food and energy and is closely watched by the Federal Reserve, rose 0.2% in April, in line with Wall Street's expectations but slower than the 0.3% increase seen in March.
+
+
+Core PCE was up 2.8% over the prior year in April, in line with estimates and unchanged from the annual increase seen in the last two months. April's reading marked the slowest month-over-month increase for the index of 2024.
+
+Oxford Economics deputy chief US economist Michael Pearce noted the cooling in month-over-month increases "represents better news on inflation than we saw in the first quarter."
+```
+
+Output:
+
+```
+{
+    "reasoning": "Let's start by symbolically analyzing the given news article to determine the sentiment towards the potential future stock value of any mentioned company.\n\n### Step-by-Step Symbolic Reasoning\n\n1. **Identify Key Statements and Facts:**\n   - The core Personal Consumption Expenditures (PCE) index rose 0.2% in April, in line with Wall Street's expectations, but slower than the 0.3% increase in March.\n   - Core PCE was up 2.8% over the prior year in April, unchanged from the previous two months.\n   - April's reading marked the slowest month-over-month increase for the index in 2024.\n   - Michael Pearce, Oxford Economics deputy chief US economist, stated that the cooling in month-over-month increases \"represents better news on inflation than we saw in the first quarter.\"\n\n2. **Determine Sentiment Towards Inflation:**\n   - Slower inflation increases are seen as positive by economist Michael Pearce.\n   - Meeting Wall Street's expectations suggests no negative surprises, which is neutral to positive.\n\n3. **Impact on Stock Values:**\n   - Positive sentiment towards inflation cooling down generally implies potential positive sentiment towards stock values, as lower inflation can lead to lower interest rates, boosting stock market performance.\n   - The consistency with Wall Street's expectations means stability, which can be perceived positively for stock values.\n\n### Symbolic Logic Representation\n\n```prolog\n% Facts\ninflation_april(core_pce, 0.2).\ninflation_march(core_pce, 0.3).\ninflation_annual(core_pce, 2.8).\n\n% Statements from experts\nstatement(michael_pearce, \"cooling in month-over-month increases represents better news on inflation than we saw in the first quarter\").\n\n% Reasoning\nsentiment_towards_inflation(michael_pearce, positive).\ninflation_meets_expectations(wall_street, true).\n\n% Inference rules\npositive_inflation_news -> positive_stock_sentiment.\nmeeting_expectations -> neutral_or_positive_stock_sentiment.\n\n% Sentiment towards stock value\nstock_sentiment(positive) :- positive_inflation_news, meeting_expectations.\n```\n\n### Plan to Solve the Problem\n\n1. Restate the problem:\n   - Determine the sentiment of the news article towards the future stock value based on the provided data and expert opinion.\n\n2. Formulate the plan:\n   - Analyze the provided facts and statements.\n   - Identify the sentiment towards inflation and expectations.\n   - Infer the sentiment towards future stock values based on the sentiment towards inflation and meeting expectations.\n\n3. Execute the plan:\n   - Use symbolic logic to derive the sentiment.\n\n4. Verify the solution:\n   - Ensure the derived sentiment accurately reflects the given information without unsupported assumptions.\n\n### Execution and Solution\n\n1. **Analysis:**\n   - The news article states that inflation slowed in April.\n   - Michael Pearce interprets this as positive news on inflation.\n   - The data met Wall Street's expectations.\n\n2. **Symbolic Logic Execution:**\n   ```prolog\n   positive_inflation_news = true.\n   meeting_expectations = true.\n\n   stock_sentiment(positive).\n   ```\n\n3. **Numeric Sentiment Score:**\n   - Since both indicators (positive news on inflation and meeting expectations) point towards a positive sentiment, we assign a positive sentiment score.\n   - Considering the context and the absence of any negative indicators, a reasonable sentiment score would be 0.7.\n\n4. **Confidence Score:**\n   - The confidence in this analysis is high because both key indicators align positively.\n   - Assign a confidence score of 0.9.\n\n### Final Output\n\n```prolog\n% Sentiment Score\nsentiment_score(0.7).\n\n% Confidence Score\nconfidence_score(0.9).\n```\n\n**Sentiment Score: 0.7**  \n**Confidence Score: 0.9**\n\nThis concludes the symbolic chain of thought reasoning for determining the sentiment of the provided article.",
+    "conclusion": "The sentiment of the news article regarding the potential future stock value is generally positive. The core Personal Consumption Expenditures (PCE) index showed a slower increase in April, which met Wall Street's expectations and was perceived as good news for inflation by Oxford Economics deputy chief US economist Michael Pearce. This cooling in inflation is seen as a positive indicator for the stock market, suggesting potential stability and growth.",
+    "sentiment": 0.70,
+    "confidence": 0.90
+}
+```
+
+Example 2:
+
+Input:
+
+```
+Shares of Trump Media & Technology Group (DJT), the parent company of former President Donald Trump's social media platform Truth Social, have been on a bumpy ride after Trump was found guilty on all 34 counts of falsifying business records intended to influence the 2016 presidential campaign.
+
+Shares initially fell (then climbed back) in extended hours trading post-conviction but the stock has since dropped again, down about 6% shortly after the opening bell.
+
+Trump, who will likely appeal the verdict, will be sentenced on July 11 and faces up to four years in prison on each count.
+
+Trump Media, the parent company of Truth Social, went public on the Nasdaq after merging with special purpose acquisition company Digital World Acquisition Corp.
+
+Shares have fallen about 10% since the company's public debut at the end of March.
+
+Trump founded Truth Social after he was kicked off major social media apps like Facebook and Twitter, the platform now known as X, following the Jan. 6 Capitol riots in 2021. Trump has since been reinstated on those platforms, although the former president almost exclusively posted on his Truth Social account throughout the trial.
+```
+
+Output:
+
+```
+{
+    "reasoning": "Let's analyze the given news article to determine the sentiment it expresses towards the potential future stock value of Trump Media & Technology Group (DJT).\n\n### Symbolic Reasoning of Analysis\n\n**Step-by-step Analysis:**\n\n1. **Article Overview:**\n   - The article discusses the performance of Trump Media & Technology Group's stock following legal issues faced by former President Donald Trump.\n   - It highlights key events: Trump's conviction, the stock's reaction, and future implications of the sentencing.\n\n2. **Sentiment Indicators:**\n   - **Negative Sentiment:**\n     - \"Shares initially fell\" – indicating a negative reaction to the conviction.\n     - \"the stock has since dropped again, down about 6% shortly after the opening bell\" – continued negative performance.\n     - \"Shares have fallen about 10% since the company's public debut at the end of March\" – long-term decline.\n   - **Neutral/Positive Sentiment:**\n     - \"then climbed back\" – temporary recovery in extended hours trading.\n\n3. **Future Implications:**\n   - \"Trump, who will likely appeal the verdict, will be sentenced on July 11 and faces up to four years in prison on each count.\" – Uncertainty regarding future outcomes, generally seen as negative due to potential instability.\n\n### Symbolic Logic in Prolog-syntax\n\n```prolog\n% Facts\nstock_drop(initial_fall).\nstock_climbback(temp_recovery).\nstock_drop(continuous_drop).\nstock_drop(long_term_decline).\nfuture_event(uncertainty, negative).\n\n% Rules\nnegative_sentiment(X) :- stock_drop(X).\nneutral_positive_sentiment(X) :- stock_climbback(X).\n\n% Sentiment Analysis\noverall_sentiment(negative) :- negative_sentiment(initial_fall), negative_sentiment(continuous_drop), negative_sentiment(long_term_decline), future_event(uncertainty, negative).\noverall_sentiment(neutral_positive) :- neutral_positive_sentiment(temp_recovery).\n\n% Confidence\nconfidence_score(0.8) :- overall_sentiment(negative).\nconfidence_score(0.2) :- overall_sentiment(neutral_positive).\n```\n\n### Plan\n\n1. **Identify** sentiment indicators (stock movements and key events).\n2. **Classify** these indicators into negative, neutral, or positive sentiments.\n3. **Evaluate** the overall sentiment by combining these classifications.\n4. **Assign** a numeric sentiment score and a confidence score based on the evaluation.\n\n### Adjust\n\n1. **Logic Accuracy:**\n   - The symbolic logic accurately reflects the article's content.\n2. **Plan Correctness:**\n   - The plan addresses the problem by systematically breaking down the sentiment indicators and evaluating them.\n\n### Solve\n\n1. **Negative Indicators:**\n   - Initial fall after conviction: Negative (-0.2)\n   - Continuous drop: Negative (-0.3)\n   - Long-term decline since public debut: Negative (-0.3)\n\n2. **Neutral/Positive Indicator:**\n   - Temporary recovery in extended hours: Neutral/Positive (0.1)\n\n3. **Future Implications:**\n   - Uncertainty due to upcoming sentencing: Negative (-0.3)\n\n### Overall Sentiment Calculation\n\n- Negative sentiment: -0.2 - 0.3 - 0.3 - 0.3 = -1.1\n- Neutral/Positive sentiment: +0.1\n\n**Final Sentiment Score:** \n- Total score: -1.1 + 0.1 = -1.0\n\nSince the result should be between -1.0 and 1.0, we normalize the score to -1.0.\n\n**Confidence Score:** \n- Based on the strong presence of negative indicators and the minor positive indicator, the confidence score is high.\n- Confidence score: 0.8\n\n### Verify\n\n1. **Correctness Check:**\n   - The analysis reflects the negative sentiment due to stock drops and uncertainty around future events.\n\n### Output\n\n```plaintext\nSentiment Score: -1.0\nConfidence Score: 0.8\n```\n\nThis output indicates a strong negative sentiment towards the potential future stock value of Trump Media & Technology Group with high confidence.",
+    "conclusion": "This output indicates a strong negative sentiment towards the potential future stock value of Trump Media & Technology Group with high confidence.",
+    "sentiment": -1.00,
+    "confidence": 0.80
+}
+```
+
+Example 3:
+
+
+Input:
+
+```
+The Fed's stance of holding interest rates higher for longer likely won't be shaken after a fresh reading from the central bank's favored inflation gauge showed continued stickiness of prices.
+
+The so-called "core" Personal Consumption Expenditures index, which excludes volatile food and energy prices the Fed can’t control, clocked in at 2.8% over the prior year in April. That annual increase was unchanged from March and in line with expectations.
+
+But the month-over-month increase in April showed a sliver of progress, clocking in at 0.2%. That was a tenth of a percent lower than the level for March and represented the slowest such increase for the index so far in 2024.
+
+"What we ended up getting was a mix," Ryan Wang, HSBC US economist, said on Yahoo Finance Live.
+
+The Fed "will be happy" with the month-over-month easing but the flat year-over-year figure "really doesn’t indicate much progress on disinflation this year."
+
+Thus the new inflation reading isn't likely to alter the caution expressed by numerous Fed officials in the weeks since the last Fed meeting on May 1.
+
+Cuts will happen "at some point," New York Fed president John Williams said Thursday. But "I don’t feel any urgency."
+
+What's more, Fed Chair Jerome Powell has made clear that he thinks the Fed will need more than a quarter's worth of data to make a judgment on whether inflation is steadily falling toward the central bank's goal of 2%.
+```
+
+Output:
+
+```
+{
+    "reasoning": "### Step 1: Symbolic Reasoning of Analysis of the Article's Sentiment\n\n1. **Identify the Key Entities and Actions:**\n   - **Fed's Stance:** Holding interest rates higher for longer.\n   - **Inflation Gauge:** Core Personal Consumption Expenditures (PCE) index.\n   - **Inflation Data:**\n     - Annual increase: 2.8% (unchanged from March).\n     - Monthly increase: 0.2% (slight progress).\n   - **Fed's Reaction:**\n     - Mixed results: Positive month-over-month, but no significant year-over-year progress.\n     - Caution from Fed officials: Cuts will happen eventually, but no urgency now.\n\n2. **Sentiment Analysis Components:**\n   - **Positive Sentiment Indicators:**\n     - Month-over-month increase showed progress.\n     - Fed \"will be happy\" with month-over-month easing.\n   - **Negative Sentiment Indicators:**\n     - Annual increase remained unchanged, indicating stickiness of prices.\n     - Flat year-over-year figure doesn't indicate progress on disinflation.\n     - Fed officials express caution and no urgency in cutting rates.\n\n3. **Inference:**\n   - The sentiment is mixed but leans towards cautious optimism due to slight month-over-month improvement.\n   - However, the lack of significant year-over-year progress tempers the optimism.\n\n### Step 2: Formulate Symbolic Logic\n\n```prolog\n% Facts\nfed_stance(hold_interest_rates_higher_for_longer).\ncore_pce_index(april, annual, 2.8).\ncore_pce_index(march, annual, 2.8).\ncore_pce_index(april, monthly, 0.2).\ncore_pce_index(march, monthly, 0.3).\nfed_reaction(mixed).\nfed_officials_caution(express).\nfed_officials_urgency(no_urgency).\nfed_chair(needs_more_data).\n\n% Rules\nsentiment_positive :- core_pce_index(april, monthly, X), X < core_pce_index(march, monthly, Y).\nsentiment_negative :- core_pce_index(april, annual, X), X = core_pce_index(march, annual, Y).\nsentiment_cautious :- fed_reaction(mixed), fed_officials_caution(express), fed_officials_urgency(no_urgency).\n\n% Conclusion\nsentiment(mixed_optimism) :- sentiment_positive, sentiment_negative, sentiment_cautious.\n```\n\n### Step 3: Adjust the Logic and Plan\n\n- **Adjustment:**\n  - Ensure the facts and rules correctly reflect the content of the article.\n  - Refine the rules for better accuracy.\n\n### Step 4: Execute the Plan and Solve the Problem\n\n1. **Define the Problem:**\n   - The problem is to determine the sentiment towards the potential future stock value based on the article.\n\n2. **Symbolic Logic Execution:**\n   - The sentiment is a mix of cautious optimism.\n\n3. **Sentiment Score:**\n   - Given the mixed but slightly positive outlook due to month-over-month improvement: \( \text{Sentiment Score} = 0.3 \)\n   - Confidence in the analysis: \( \text{Confidence Score} = 0.7 \)\n\n### Step 5: Verify the Solution\n\n- **Verification:**\n  - The sentiment score of 0.3 reflects cautious optimism.\n  - The confidence score of 0.7 indicates reasonable confidence based on the given data and analysis.",
+    "conclusion": "The article's sentiment towards the future stock value is cautiously optimistic. The slight month-over-month improvement in the inflation gauge is positive, but the unchanged annual increase and Fed officials' caution temper this outlook.",
+    "sentiment": 0.30,
+    "confidence": 0.70
+}
+```
+
+are you ready to begin?
