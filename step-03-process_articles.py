@@ -35,7 +35,7 @@ os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY") or "YOUR_API_KE
 os.environ["COHERE_API_KEY"] = os.getenv("COHERE_API_KEY") or "YOUR_API_KEY"
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY") or "YOUR_API_KEY"
 os.environ["MISTRAL_API_KEY"] = os.getenv("MISTRAL_API_KEY") or "YOUR_API_KEY"
-
+os.environ["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY") or "YOUR_API_KEY"
 
 print("GROQ_API_KEY:", os.getenv("GROQ_API_KEY"))
 print("PERPLEXITY_API_KEY:", os.getenv("PERPLEXITY_API_KEY"))
@@ -46,9 +46,13 @@ print("MISTRAL_API_KEY:", os.getenv("MISTRAL_API_KEY"))
 
 
 alternate_models = [
+    # {
+    #     "model": "groq/llama3-70b-8192",
+    #     "api_key": os.getenv("GROQ_API_KEY"),
+    # },
     {
-        "model": "groq/llama3-70b-8192",
-        "api_key": os.getenv("GROQ_API_KEY"),
+        "model": "perplexity/llama-3-70b-instruct",
+        "api_key": os.getenv("PERPLEXITY_API_KEY"),
     },
     {
         "model": "perplexity/llama-3-70b-instruct",
@@ -59,16 +63,12 @@ alternate_models = [
         "api_key": os.getenv("PERPLEXITY_API_KEY"),
     },
     {
-        "model": "openai/gpt-3.5-turbo-0125",
-        "api_key": os.getenv("OPENAI_API_KEY"),
-    },
-    {
-        "model": "openai/gpt-4-turbo-2024-04-09",
+        "model": "openai/gpt-4o",
         "api_key": os.getenv("OPENAI_API_KEY"),
     },
     # {
-    #     "model": "mistral/mistral-large-latest",
-    #     "api_key": os.getenv("MISTRAL_API_KEY"),
+    #     "model": "openai/gpt-3.5-turbo-0125",
+    #     "api_key": os.getenv("OPENAI_API_KEY"),
     # },
     # {
     #     "model": "anthropic/claude-3-sonnet-20240229",
@@ -77,7 +77,7 @@ alternate_models = [
 ]
 
 
-system_message = read_message_from_file("messages/system_message.txt")
+system_message = read_message_from_file("messages/system_message_symbolic.txt")
 
 # Get the current date and time in the desired format
 current_datetime = datetime.datetime.utcnow().strftime("%A %B %d %Y %H:%M:%S UTC")
@@ -86,7 +86,10 @@ current_datetime = datetime.datetime.utcnow().strftime("%A %B %d %Y %H:%M:%S UTC
 system_message = system_message.replace("{date_msg}", current_datetime)
 
 
-message = read_message_from_file("messages/user_message.txt")
+message = read_message_from_file("messages/user_message_symbolic.txt")
+
+print("system_message:", system_message)
+print("message:", message)
 
 
 def call_api(model, messages, max_tokens, temperature, api_key):
@@ -100,6 +103,7 @@ def call_api(model, messages, max_tokens, temperature, api_key):
         max_tokens=max_tokens,
         temperature=temperature,
         api_key=api_key,
+        response_format={"type": "json_object"},
     )
 
 
@@ -128,6 +132,8 @@ def extract_response(response):
     """
     Extracts and validates the response from the API call.
     """
+    import re
+
     if (
         isinstance(response, ModelResponse)
         and "choices" in response
@@ -140,7 +146,14 @@ def extract_response(response):
             and hasattr(choice, "message")
             and hasattr(choice.message, "content")
         ):
-            return choice.message.content
+            content = choice.message.content
+
+            # Regular expression to find JSON object
+            json_match = re.search(r"\{.*\}", content, re.DOTALL)
+            if json_match:
+                return json_match.group(0).strip()
+            else:
+                return content.strip()
         else:
             raise TypeError("Response 'choices' missing 'message' or 'content'.")
     else:
@@ -149,7 +162,7 @@ def extract_response(response):
         )
 
 
-def make_api_call(initial_messages, model_index, temperature, num_ctx):
+def make_api_call(initial_messages, model_index, temperature, max_tokens):
     """
     Generic function to make an API call to a model with a retry mechanism.
     Alternates between models based on the model_index.
@@ -162,7 +175,7 @@ def make_api_call(initial_messages, model_index, temperature, num_ctx):
     print(f"Making API call to model: {model} with index {model_index}")
     print()
     response = retry_api_call(
-        model, initial_messages, num_ctx, temperature, api_key, retry_delays
+        model, initial_messages, max_tokens, temperature, api_key, retry_delays
     )
     return extract_response(response)
 
@@ -171,7 +184,7 @@ def make_api_call(initial_messages, model_index, temperature, num_ctx):
 class QueryParams:
     article: str
     temperature: float = 0.1
-    num_ctx: int = 2048
+    max_tokens: int = 1375
     model_index: int = 0  # Default to the first model
 
 
@@ -181,7 +194,7 @@ def query_llm(params: QueryParams) -> str:
         {"role": "user", "content": message},
         {
             "role": "assistant",
-            "content": "yes, lets begin, please provide your text and I will respond with json",
+            "content": "yes, lets begin, please provide your text and I will respond with a valid JSON object string adhering to the schema.",
         },
     ]
 
@@ -191,7 +204,7 @@ def query_llm(params: QueryParams) -> str:
         initial_messages,
         model_index=params.model_index,
         temperature=params.temperature,
-        num_ctx=params.num_ctx,
+        max_tokens=params.max_tokens,
     )
     return response
 
@@ -294,7 +307,7 @@ def process_all_files(directory_path, output_file, processed_records_file):
 directory_path = "data/inputs/articles"
 
 # hash file that keeps track of processed records
-processed_records_file = "data/Processed_Records.txt"
+processed_records_file = "data/Processed_Records_may31_24.txt"
 
-output_file = "data/outputs/Processed_Articles_output_70b.csv"
+output_file = "data/outputs/Processed_Articles_output_70b_may31_24.csv"
 process_all_files(directory_path, output_file, processed_records_file)
