@@ -13,13 +13,13 @@ def generate_record_id(title, description):
 
 
 def load_processed_records(file_path):
-    try:
-        with open(file_path, "r") as file:
-            records = file.read().splitlines()
-            # Ensure all lines are treated as individual record IDs, not as a JSON array
-            return set(records)
-    except FileNotFoundError:
+    file = Path(file_path)
+    if not file.exists():
+        file.touch()  # Create the file if it doesn't exist
         return set()
+    with file.open("r", encoding="utf-8") as f:
+        records = f.read().splitlines()
+        return set(records)
 
 
 def save_processed_records(processed_records, file_path):

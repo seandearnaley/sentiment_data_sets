@@ -1,13 +1,13 @@
 """
-This script processes articles dataset, processes synthetic outputs from multiple providers using litellm and saves the output to a new CSV file.
+This script processes the Financial PhraseBank dataset and saves the output to a CSV file.
 
-https://newsdata.io/datasets
+https://huggingface.co/datasets/financial_phrasebank
 """
 
 import csv
 import datetime
-import json
 import os
+import re
 import time
 from dataclasses import dataclass
 from typing import Any, List
@@ -45,42 +45,6 @@ print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))
 print("MISTRAL_API_KEY:", os.getenv("MISTRAL_API_KEY"))
 
 
-alternate_models = [
-    # {
-    #     "model": "groq/llama3-70b-8192",
-    #     "api_key": os.getenv("GROQ_API_KEY"),
-    # },
-    # {
-    #     "model": "perplexity/llama-3-8b-instruct",
-    #     "api_key": os.getenv("PERPLEXITY_API_KEY"),
-    # },
-    {
-        "model": "perplexity/llama-3-8b-instruct",
-        "api_key": os.getenv("PERPLEXITY_API_KEY"),
-    },
-    {
-        "model": "perplexity/llama-3-8b-instruct",
-        "api_key": os.getenv("PERPLEXITY_API_KEY"),
-    },
-    # {
-    #     "model": "openai/gpt-4o",
-    #     "api_key": os.getenv("OPENAI_API_KEY"),
-    # },
-    # {
-    #     "model": "openai/gpt-4o",
-    #     "api_key": os.getenv("OPENAI_API_KEY"),
-    # },
-    # {
-    #     "model": "openai/gpt-3.5-turbo-0125",
-    #     "api_key": os.getenv("OPENAI_API_KEY"),
-    # },
-    # {
-    #     "model": "anthropic/claude-3-sonnet-20240229",
-    #     "api_key": os.getenv("ANTHROPIC_API_KEY"),
-    # },
-]
-
-
 system_message = read_message_from_file("messages/system_message_symbolic.txt")
 
 # Get the current date and time in the desired format
@@ -96,29 +60,29 @@ print("system_message:", system_message)
 print("message:", message)
 
 
-def call_api(model, messages, max_tokens, temperature, api_key):
+def call_api(messages, max_tokens, temperature):
     """
     Makes a single API call to the specified model.
     """
     return completion(
-        model=model,
+        model="ollama/lstep/neuraldaredevil-8b-abliterated:q8_0",
         stream=False,
         messages=messages,
         max_tokens=max_tokens,
         temperature=temperature,
-        api_key=api_key,
+        api_base="http://localhost:11434",
         response_format={"type": "json_object"},
     )
 
 
-def retry_api_call(model, messages, max_tokens, temperature, api_key, retry_delays):
+def retry_api_call(messages, max_tokens, temperature, retry_delays):
     """
     Retries API call based on the specified retry delays.
     """
     for attempt, delay in enumerate(retry_delays, start=1):
         try:
-            print(f"Attempt {attempt}: Calling API with model {model}")
-            response = call_api(model, messages, max_tokens, temperature, api_key)
+            print(f"Attempt {attempt}: Calling API")
+            response = call_api(messages, max_tokens, temperature)
             print("API call successful.")
             return response
         except litellm.exceptions.APIConnectionError:
@@ -166,21 +130,12 @@ def extract_response(response):
         )
 
 
-def make_api_call(initial_messages, model_index, temperature, max_tokens):
+def make_api_call(initial_messages, temperature, max_tokens):
     """
     Generic function to make an API call to a model with a retry mechanism.
-    Alternates between models based on the model_index.
     """
-    retry_delays = [2, 4, 8]  # seconds
-    model_details = alternate_models[model_index]
-    api_key = model_details["api_key"]
-    model = model_details["model"]
-    print()
-    print(f"Making API call to model: {model} with index {model_index}")
-    print()
-    response = retry_api_call(
-        model, initial_messages, max_tokens, temperature, api_key, retry_delays
-    )
+    retry_delays = [30, 60, 90]  # seconds
+    response = retry_api_call(initial_messages, max_tokens, temperature, retry_delays)
     return extract_response(response)
 
 
@@ -188,7 +143,7 @@ def make_api_call(initial_messages, model_index, temperature, max_tokens):
 class QueryParams:
     article: str
     temperature: float = 0.2
-    max_tokens: int = 900
+    max_tokens: int = 800
     model_index: int = 0  # Default to the first model
 
 
@@ -206,7 +161,6 @@ def query_llm(params: QueryParams) -> str:
 
     response = make_api_call(
         initial_messages,
-        model_index=params.model_index,
         temperature=params.temperature,
         max_tokens=params.max_tokens,
     )
@@ -220,113 +174,86 @@ def write_header_if_needed(output_file, writer):
         writer.writerow(["Article", "Sentiment"])
 
 
-def process_article(
-    title,
-    description,
-    pub_date,
+def clean_input(phrase: str) -> str:
+    """
+    Removes control characters from the input phrase.
+    """
+    return re.sub(r"[\x00-\x1F]+", "", phrase)
+
+
+def process_phrase(
+    phrase,
     processed_records,
     writer,
     processed_records_file,
     save_interval,
     count,
-    model_index,
 ):
-    article_parts = []
-    if pub_date:
-        article_parts.append(pub_date)
-    if title:
-        article_parts.append(title)
-    if description:
-        article_parts.append(description)
-
-    article = "\n".join(article_parts)
-    record_id = generate_record_id(title, description)
+    phrase = clean_input(phrase)
+    record_id = generate_record_id(phrase, None)
     if record_id in processed_records:
-        # print(f"Skipping already processed article: {record_id}")
+        print(f"Skipping already processed phrase: {record_id}")
         return count  # Skip processing if record has been processed
 
     attempts = 0
     while attempts < 3:
         try:
-            print(f"Processing article: {record_id}")
-            sentiment_json = query_llm(
-                QueryParams(article=article, model_index=model_index)
-            )
+            print(f"Processing phrase: {record_id}")
+            sentiment_json = query_llm(QueryParams(article=phrase))
             SentimentResponse.model_validate_json(sentiment_json)
-            writer.writerow([article, sentiment_json])
+            writer.writerow([phrase, sentiment_json])
             processed_records.add(record_id)
-            break  # Exit the loop if validation is successful
+
+            if (
+                count is not None
+                and save_interval is not None
+                and count % save_interval == 0
+            ):
+                save_processed_records(processed_records, processed_records_file)
+
+            # Ensure count is not None
+            if count is None:
+                count = 0
+
+            return count + 1
         except ValidationError as e:
-            print(f"Validation error: {e.json()}")
+            print(f"Validation error: {e}")
             attempts += 1
-        except json.JSONDecodeError:
-            print("Failed to decode JSON.")
+            time.sleep(1)  # Wait before retrying
+        except Exception as e:
+            print(f"An error occurred: {e}")
             attempts += 1
-
-    count += 1
-    print(f"Processed count: {count}")  # Print the count
-
-    if count % save_interval == 0:
-        print()  # New line before
-        print(f"Saving Processed {count} articles.")
-        print()  # New line after
-        save_processed_records(processed_records, processed_records_file)
-
-    if attempts == 3:
-        print("Failed to process article after 3 attempts:", article)
-    return count
+            time.sleep(1)  # Wait before retrying
 
 
-def process_file(
-    file_path, output_file, processed_records, processed_records_file, save_interval=5
-):
-    with open(file_path, "r", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
+def main():
+    input_file = "data/inputs/FinancialPhraseBank-v1.0/Sentences_AllAgree.txt"
+    output_file = "data/outputs/processed_phrases_jun1_24.csv"
+    processed_records_file = "data/processed_phrase_records.txt"
+    save_interval = 5
+
+    processed_records = load_processed_records(processed_records_file)
+
+    with open(input_file, "r", encoding="ISO-8859-1") as infile:
         with open(output_file, "a", newline="", encoding="utf-8") as outfile:
             writer = csv.writer(outfile)
             write_header_if_needed(output_file, writer)
 
             count = 0
-            model_index = 0
-            for row in reader:
-                title = row["title"]
-                description = row["description"]
-                pub_date = row["pubDate"]
-                count = process_article(
-                    title,
-                    description,
-                    pub_date,
-                    processed_records,
-                    writer,
-                    processed_records_file,
-                    save_interval,
-                    count,
-                    model_index,
-                )
+            for line in infile:
+                phrase = line.strip()
+                if phrase:
+                    count = process_phrase(
+                        phrase,
+                        processed_records,
+                        writer,
+                        processed_records_file,
+                        save_interval,
+                        count,
+                    )
 
-                # Update model_index for the next article
-                model_index = (model_index + 1) % len(alternate_models)
-
-            # Save any remaining records that were not saved due to the interval
-            save_processed_records(processed_records, processed_records_file)
-
-
-def process_all_files(directory_path, output_file, processed_records_file):
-    processed_records = load_processed_records(processed_records_file)
-    for file_name in os.listdir(directory_path):
-        if file_name.endswith(".csv"):
-            file_path = os.path.join(directory_path, file_name)
-            process_file(
-                file_path, output_file, processed_records, processed_records_file
-            )
     save_processed_records(processed_records, processed_records_file)
 
 
-# Example usage
-directory_path = "data/inputs/articles"
-
-# hash file that keeps track of processed records
-processed_records_file = "data/Processed_Records_may31_24.txt"
-
-output_file = "data/outputs/Processed_Articles_output_70b_may31_24.csv"
-process_all_files(directory_path, output_file, processed_records_file)
+if __name__ == "__main__":
+    main()
