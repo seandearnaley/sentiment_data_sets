@@ -188,7 +188,7 @@ def make_api_call(initial_messages, model_index, temperature, max_tokens):
 class QueryParams:
     article: str
     temperature: float = 0.2
-    max_tokens: int = 900
+    max_tokens: int = 1200
     model_index: int = 0  # Default to the first model
 
 
@@ -202,7 +202,7 @@ def query_llm(params: QueryParams) -> str:
         },
     ]
 
-    initial_messages.append({"role": "user", "content": params.article})
+    initial_messages.append({"role": "user", "content": params.article[:5000]})
 
     response = make_api_call(
         initial_messages,
